@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I'm Sorry</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fce4ec;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            text-align: center;
+            transition: background-color 2s ease;
+        }
+
+        /* Splash Screen Styles */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .splash-title {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(-30px);
+            animation: splashFadeIn 1s ease forwards 0.5s;
+        }
+
+        .splash-subtitle {
+            color: #f8f9fa;
+            font-size: 1.5rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: splashFadeIn 1s ease forwards 1s;
+        }
+
+        .splash-heart {
+            font-size: 4rem;
+            color: #ff6b9d;
+            margin: 30px 0;
+            opacity: 0;
+            animation: heartBeat 2s ease infinite 1.5s, splashFadeIn 1s ease forwards 1.5s;
+        }
+
+        @keyframes splashFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Envelope Styles */
+        .envelope-container {
+            position: relative;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        .envelope {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 100px solid #e91e63;
+            border-radius: 10px 10px 0 0;
+            transform-origin: top center;
+            transition: transform 0.8s ease;
+            z-index: 2;
+        }
+
+        .envelope.opened .envelope-flap {
+            transform: rotateX(180deg);
+        }
+
+        .envelope-body {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 300px;
+            height: 150px;
+            background-color: #fff;
+            border-radius: 0 0 10px 10px;
+            border: 2px solid #e91e63;
+            border-top: none;
+        }
+
+        .envelope-letter {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 260px;
+            height: 160px;
+            background-color: #fafafa;
+            border-radius: 5px;
+            padding: 20px;
+            box-sizing: border-box;
+            transform: translateY(0);
+            transition: transform 0.8s ease 0.3s;
+            opacity: 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #555;
+            overflow: hidden;
+        }
+
+        .envelope.opened .envelope-letter {
+            transform: translateY(-50px);
+            opacity: 1;
+        }
+
+        .open-button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #e91e63, #ff6b9d);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .open-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .container {
+            max-width: 800px;
+            padding: 20px;
+            position: relative;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .container.show {
+            opacity: 1;
+        }
+
+        h1 {
+            color: #e91e63;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(-50px);
+            animation: fadeInDown 1s ease forwards 0.5s;
+        }
+
+        .heart {
+            position: absolute;
+            color: #e91e63;
+            font-size: 24px;
+            opacity: 0;
+            animation: floatHeart 5s ease-in infinite;
+        }
+
+        .message {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: fadeInScale 1s ease forwards 1s;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .highlight {
+            color: #e91e63;
+            font-weight: bold;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            margin: 30px 0;
+            color: #e91e63;
+            font-weight: bold;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 2s;
+            display: none;
+        }
+
+        .question.show {
+            display: block;
+        }
+
+        .buttons {
+            display: none;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 2.5s;
+        }
+
+        .buttons.show {
+            display: flex;
+        }
+
+        .btn {
+            padding: 12px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .btn-yes {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .btn-yes:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-no {
+            background-color: #f44336;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        /* Dialog Box Styles */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .dialog-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .dialog-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            text-align: center;
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+        }
+
+        .dialog-overlay.show .dialog-box {
+            transform: scale(1);
+        }
+
+        .dialog-box h2 {
+            color: #4caf50;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .dialog-box p {
+            color: #555;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .close-dialog {
+            margin-top: 20px;
+            padding: 10px 25px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .celebration.show {
+            opacity: 1;
+        }
+
+        .flower {
+            position: absolute;
+            font-size: 30px;
+            animation: flowerFall 6s linear infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes flowerFall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-title">An Apology</div>
+        <div class="splash-heart">💕</div>
+        <div class="splash-subtitle">From Yusuke The MAN to his shortyyyyyyy </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <h1>I'm Sorry</h1>
+        
+        <!-- Envelope Section -->
+        <div class="envelope-container" id="envelopeContainer">
+            <div class="envelope" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="envelope-body"></div>
+                <div class="envelope-letter">
+                    <p style="font-size: 0.8rem; margin: 5px 0;">My Dearest Love,</p>
+                    <p style="font-size: 0.7rem; margin: 3px 0;">I'm writing this to apologize from the bottom of my heart...</p>
+                    <p style="font-size: 0.7rem; margin: 3px 0;">Click to read the full message ❤️</p>
+                </div>
+            </div>
+            <button class="open-button" id="openButton">Open My Letter</button>
+        </div>
+        
+        <!-- Main Message (Hidden initially) -->
+        <div class="message" id="message">
+            <p>My love, I want to apologize from the bottom of my heart for hurting you last time thacha maile last time mistake gare ani</p>
+            <p>I know words can't undo what happened, but I hope you know how <span class="highlight">deeply sorry</span> I am.</p>
+            <p>I’m really sorry for hurting you recently. I know I’ve made mistakes, and I hate seeing you upset because of me. तिमीलाई पिडा दिएर म दुखी छु hera mero efforts nepali na aayera pani nepali ma lekheko and now I promise to be better and learn from this. I care about you more than anything, and I never want to hurt you again.
+Please forgive me, I miss your dimple bhako smile.</p>
+            
+        </div>
+        
+        <div class="question" id="question">Will you forgive me?</div>
+        
+        <div class="buttons" id="buttons">
+            <button class="btn btn-yes" id="yesBtn">Yes</button>
+            <button class="btn btn-no" id="noBtn">No</button>
+        </div>
+    </div>
+
+    <!-- Dialog Box for Yes Response -->
+    <div class="dialog-overlay" id="dialogOverlay">
+        <div class="dialog-box">
+            <h2>Thank you! ❤️</h2>
+            <p>Thank you for your forgiveness!</p>
+            <p>I promise to make it up to you and show you every day how much you mean to me.</p>
+            <p>You're the most amazing person in my life, and I'm so lucky to have you ani timi jasto aru koi pauna hola maile</p>
+            <p>ani remember hai still i am a man ahahaha </p>
+            <button class="close-dialog" id="closeDialog">Close</button>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <script>
+        // Hide splash screen after 3 seconds
+        setTimeout(() => {
+            document.getElementById('splashScreen').classList.add('hidden');
+            document.getElementById('mainContainer').classList.add('show');
+        }, 3000);
+
+        // Envelope opening functionality
+        document.getElementById('openButton').addEventListener('click', function() {
+            const envelope = document.getElementById('envelope');
+            const message = document.getElementById('message');
+            const question = document.getElementById('question');
+            const buttons = document.getElementById('buttons');
+            const envelopeContainer = document.getElementById('envelopeContainer');
+            
+            envelope.classList.add('opened');
+            
+            setTimeout(() => {
+                envelopeContainer.style.display = 'none';
+                message.classList.add('show');
+                question.classList.add('show');
+                buttons.classList.add('show');
+                createHearts();
+            }, 1000);
+        });
+
+        // Create floating hearts
+        function createHearts() {
+            const container = document.querySelector('.container');
+            const heartCount = 20;
+            
+            for (let i = 0; i < heartCount; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.innerHTML = '❤️';
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.animationDuration = 5 + Math.random() * 5 + 's';
+                    heart.style.animationDelay = Math.random() * 5 + 's';
+                    container.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 10000);
+                }, i * 300);
+            }
+        }
+
+        // Create confetti effect
+        function createConfetti() {
+            const celebration = document.getElementById('celebration');
+            celebration.classList.add('show');
+            
+            const shapes = ['❤️', '✨', '🌸', '💕', '🌹', '🌷', '🌼'];
+            
+            for (let i = 0; i < 100; i++) {
+                const flower = document.createElement('div');
+                flower.className = 'flower';
+                flower.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                flower.style.left = Math.random() * 100 + '%';
+                flower.style.animationDuration = 3 + Math.random() * 4 + 's';
+                flower.style.animationDelay = Math.random() * 2 + 's';
+                celebration.appendChild(flower);
+            }
+        }
+
+        // Handle Yes button click - Show dialog
+        document.getElementById('yesBtn').addEventListener('click', function() {
+            const dialogOverlay = document.getElementById('dialogOverlay');
+            dialogOverlay.classList.add('show');
+            createConfetti();
+            document.body.style.backgroundColor = '#e8f5e9';
+        });
+
+        // Close dialog
+        document.getElementById('closeDialog').addEventListener('click', function() {
+            const dialogOverlay = document.getElementById('dialogOverlay');
+            dialogOverlay.classList.remove('show');
+        });
+
+        // Handle No button hover - make it run away
+        document.getElementById('noBtn').addEventListener('mouseover', function(e) {
+            const button = e.target;
+            const container = document.querySelector('.container');
+            
+            const newX = Math.random() * (container.offsetWidth - button.offsetWidth);
+            const newY = Math.random() * (container.offsetHeight - button.offsetHeight);
+            
+            const safeX = Math.min(Math.max(newX, 0), container.offsetWidth - button.offsetWidth);
+            const safeY = Math.min(Math.max(newY, 0), container.offsetHeight - button.offsetHeight);
+            
+            button.style.position = 'absolute';
+            button.style.left = safeX + 'px';
+            button.style.top = safeY + 'px';
+        });
+
+        // Create hearts periodically after envelope is opened
+        setInterval(() => {
+            if (document.getElementById('message').classList.contains('show')) {
+                createHearts();
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
